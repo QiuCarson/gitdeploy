@@ -134,7 +134,7 @@ func (this *BaseController) display(tpl ...string) {
 	this.LayoutSections["Navbar"] = "layout/sections/navbar.html"
 	this.LayoutSections["Sidebar"] = "layout/sections/sidebar.html"
 
-	user := new(models.Auth).GetUser()
+	user := this.auth.GetUser()
 
 	this.Data["version"] = beego.AppConfig.String("version")
 	this.Data["curRoute"] = this.controllerName + "." + this.actionName

@@ -94,14 +94,14 @@ func (this *MainController) Login() {
 	if this.userId > 0 {
 		this.redirect("/")
 	}
-	/*beego.ReadFromRequest(&this.Controller)
+	beego.ReadFromRequest(&this.Controller)
 	if this.isPost() {
 		flash := beego.NewFlash()
 		username := this.GetString("username")
 		password := this.GetString("password")
 		remember := this.GetString("remember")
 		if username != "" && password != "" {
-			token, err := auths.Login(username, password)
+			token, err := this.auth.Login(username, password)
 			if err != nil {
 				flash.Error(err.Error())
 				flash.Store(&this.Controller)
@@ -112,24 +112,21 @@ func (this *MainController) Login() {
 				} else {
 					this.Ctx.SetCookie("auth", token)
 				}
-				actions.Login(username, auths.GetUserId(), this.getClientIp())
+				new(models.Action).Login(username, this.auth.GetUserId(), this.getClientIp())
 				this.redirect(beego.URLFor(".Index"))
 			}
 
 		}
-	}*/
+	}
 
 	this.TplName = "main/login.html"
 }
 
 // 退出登录
 func (this *MainController) Logout() {
-	var (
-		actions models.Action
-		auths   models.Auth
-	)
-	actions.Logout(auths.GetUser().UserName, auths.GetUserId(), this.getClientIp())
-	auths.Logout()
+
+	new(models.Action).Logout(this.auth.GetUser().UserName, this.auth.GetUserId(), this.getClientIp())
+	this.auth.Logout()
 	this.Ctx.SetCookie("auth", "")
 	this.redirect(beego.URLFor(".Login"))
 }

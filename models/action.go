@@ -3,8 +3,6 @@ package models
 import (
 	"fmt"
 	"time"
-
-	"github.com/lisijie/gopub/app/entity"
 )
 
 // 用户动作
@@ -86,7 +84,7 @@ func (this *Action) Logout(userName string, userId int, ip string) {
 
 // 添加记录
 func (this *Action) Add(action, actor, objectType string, objectId int, extra string) bool {
-	act := new(entity.Action)
+	act := new(Action)
 	act.Action = action
 	act.Actor = actor
 	act.ObjectType = objectType
