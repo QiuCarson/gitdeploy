@@ -7,6 +7,7 @@ import (
 
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/orm"
+	_ "github.com/go-sql-driver/mysql"
 )
 
 var (
@@ -35,13 +36,17 @@ func init() {
 		new(User),
 		new(Role),
 		new(Perm),
+		new(Action),
+		new(Server),
+		new(Project),
+		new(Task),
 	)
 
 	if beego.AppConfig.String("runmode") == "dev" {
 		orm.Debug = true
 	}
 	o = orm.NewOrm()
-	orm.RunCommand()
+	//orm.RunCommand()
 
 }
 
@@ -55,4 +60,10 @@ func Md5(buf []byte) string {
 	hash := md5.New()
 	hash.Write(buf)
 	return fmt.Sprintf("%x", hash.Sum(nil))
+}
+
+func DBVersion() string {
+	var lists []orm.ParamsList
+	o.Raw("SELECT VERSION()").ValuesList(&lists)
+	return lists[0][0].(string)
 }

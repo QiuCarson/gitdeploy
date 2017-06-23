@@ -1,6 +1,7 @@
 package models
 
 import (
+	"errors"
 	"time"
 
 	"github.com/astaxie/beego/orm"
@@ -25,8 +26,8 @@ type UserRole struct {
 	RoleId int // 角色id
 }
 
-func (m *User) TableName() string {
-	return "posts"
+func (this *User) table() string {
+	return tableName("user")
 }
 func (m *User) Query() orm.QuerySeter {
 	return orm.NewOrm().QueryTable(m)
@@ -59,4 +60,26 @@ func (this *User) GetUserRoleList(userId int) ([]Role, error) {
 		}
 	}
 	return roleList, nil
+}
+
+// 获取用户总数
+func (this *User) GetTotal() (int64, error) {
+	return o.QueryTable(this.table()).Count()
+}
+
+// 根据用户名获取用户信息
+func (this *User) GetUserByName(userName string) (*User, error) {
+	user := &User{}
+	user.UserName = userName
+	err := o.Read(user, "UserName")
+	return user, err
+}
+
+// 更新用户信息
+func (this *User) UpdateUser(user *User, fileds ...string) error {
+	if len(fileds) < 1 {
+		return errors.New("更新字段不能为空")
+	}
+	_, err := o.Update(user, fileds...)
+	return err
 }
