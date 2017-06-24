@@ -1,6 +1,9 @@
 package models
 
-import "time"
+import (
+	"errors"
+	"time"
+)
 
 // 表结构
 type Server struct {
@@ -29,4 +32,38 @@ func (this *Server) table() string {
 
 func (this *Server) GetTotal(typeId int) (int64, error) {
 	return o.QueryTable(this.table()).Filter("TypeId", typeId).Count()
+}
+
+// 获取一个服务器信息
+func (this *Server) GetServer(id int, types ...int) (*Server, error) {
+	var err error
+	server := &Server{}
+	server.Id = id
+	if len(types) == 0 {
+		err = o.Read(server)
+	} else {
+		err = o.QueryTable(this.table()).Filter("id", id).Filter("type_id", types[0]).One(server)
+	}
+	return server, err
+}
+
+// 获取跳板服务器列表
+func (this *Server) GetAgentList(page, pageSize int) ([]Server, error) {
+	var list []Server
+	qs := o.QueryTable(this.table()).Filter("TypeId", SERVER_TYPE_AGENT)
+	if pageSize > 0 {
+		qs = qs.Limit(pageSize, (page-1)*pageSize)
+	}
+	_, err := qs.All(&list)
+	return list, err
+}
+
+// 添加服务器
+func (this *Server) AddServer(server *Server) error {
+	server.Id = 0
+	if o.Read(server, "ip"); server.Id > 0 {
+		return errors.New("服务器IP已存在:" + server.Ip)
+	}
+	_, err := o.Insert(server)
+	return err
 }

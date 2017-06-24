@@ -82,6 +82,11 @@ func (this *Action) Logout(userName string, userId int, ip string) {
 	this.Add("logout", userName, "user", userId, ip)
 }
 
+// 更新个人信息
+func (this *Action) UpdateProfile(userName string, userId int) {
+	this.Add("update_profile", userName, "user", userId, "")
+}
+
 // 添加记录
 func (this *Action) Add(action, actor, objectType string, objectId int, extra string) bool {
 	act := new(Action)

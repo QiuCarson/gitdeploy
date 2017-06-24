@@ -133,5 +133,43 @@ func (this *MainController) Logout() {
 
 // 个人信息
 func (this *MainController) Profile() {
+	var (
+		users   models.User
+		actions models.Action
+	)
+	user := this.auth.GetUser()
 
+	if this.isPost() {
+		flash := beego.NewFlash()
+		beego.ReadFromRequest(&this.Controller)
+		email := this.GetString("email")
+		sex, _ := this.GetInt("sex")
+		password1 := this.GetString("password1")
+		password2 := this.GetString("password2")
+
+		user.Email = email
+		user.Sex = sex
+		users.UpdateUser(user, "Email", "Sex")
+		if password1 != "" {
+			if len(password1) < 6 {
+				flash.Error("密码长度必须大于6位")
+				flash.Store(&this.Controller)
+				this.redirect(beego.URLFor(".Profile"))
+			} else if password2 != password1 {
+				flash.Error("两次输入的密码不一致")
+				flash.Store(&this.Controller)
+				this.redirect(beego.URLFor(".Profile"))
+			} else {
+				users.ModifyPassword(this.userId, password1)
+			}
+		}
+		actions.UpdateProfile(this.auth.GetUser().UserName, this.userId)
+		flash.Success("修改成功！")
+		flash.Store(&this.Controller)
+		this.redirect(beego.URLFor(".Profile"))
+	}
+
+	this.Data["pageTitle"] = "个人信息"
+	this.Data["user"] = user
+	this.display()
 }

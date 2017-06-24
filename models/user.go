@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/astaxie/beego/orm"
+	"github.com/astaxie/beego/utils"
 )
 
 type User struct {
@@ -81,5 +82,17 @@ func (this *User) UpdateUser(user *User, fileds ...string) error {
 		return errors.New("更新字段不能为空")
 	}
 	_, err := o.Update(user, fileds...)
+	return err
+}
+
+// 修改密码
+func (this *User) ModifyPassword(userId int, password string) error {
+	user, err := this.GetUser(userId, false)
+	if err != nil {
+		return err
+	}
+	user.Salt = string(utils.RandomCreateBytes(10))
+	user.Password = Md5([]byte(password + user.Salt))
+	_, err = o.Update(user, "Salt", "Password")
 	return err
 }

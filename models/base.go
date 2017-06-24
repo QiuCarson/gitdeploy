@@ -67,3 +67,24 @@ func DBVersion() string {
 	o.Raw("SELECT VERSION()").ValuesList(&lists)
 	return lists[0][0].(string)
 }
+
+func debug(v ...interface{}) {
+	beego.Debug(v...)
+}
+
+func concatenateError(err error, stderr string) error {
+	if len(stderr) == 0 {
+		return err
+	}
+	return fmt.Errorf("%v: %s", err, stderr)
+}
+
+// 某个项目的代码目录
+func GetProjectPath(name string) string {
+	return GetProjectsBasePath() + "/" + name
+}
+
+// 所有项目根目录
+func GetProjectsBasePath() string {
+	return fmt.Sprintf(beego.AppConfig.String("data_dir") + "/projects")
+}

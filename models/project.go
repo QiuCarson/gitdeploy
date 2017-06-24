@@ -1,6 +1,8 @@
 package models
 
-import "time"
+import (
+	"time"
+)
 
 // 表结构
 type Project struct {
@@ -40,4 +42,53 @@ func (this *Project) GetProject(id int) (*Project, error) {
 // 获取项目总数
 func (this *Project) GetTotal() (int64, error) {
 	return o.QueryTable(this.table()).Count()
+}
+
+// 获取项目列表
+func (this *Project) GetList(page, pageSize int) ([]Project, error) {
+	var list []Project
+	offset := 0
+	if pageSize == -1 {
+		pageSize = 100000
+	} else {
+		offset = (page - 1) * pageSize
+		if offset < 0 {
+			offset = 0
+		}
+	}
+
+	_, err := o.QueryTable(this.table()).Offset(offset).Limit(pageSize).All(&list)
+	return list, err
+}
+
+// 添加项目
+func (this *Project) AddProject(project *Project) error {
+	_, err := o.Insert(project)
+	return err
+}
+
+// 更新项目信息
+func (this *Project) UpdateProject(project *Project, fields ...string) error {
+	_, err := o.Update(project, fields...)
+	return err
+}
+
+// 克隆某个项目的仓库
+func (this *Project) CloneRepo(projectId int) error {
+	var reposityors Repository
+	project, err := this.GetProject(projectId)
+	if err != nil {
+		return err
+	}
+
+	err = reposityors.CloneRepo(project.RepoUrl, GetProjectPath(project.Domain))
+	if err != nil {
+		project.Status = -1
+		project.ErrorMsg = err.Error()
+	} else {
+		project.Status = 1
+	}
+	this.UpdateProject(project, "Status", "ErrorMsg")
+
+	return err
 }

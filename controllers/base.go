@@ -186,3 +186,10 @@ func (this *BaseController) getClientIp() string {
 	}
 	return this.Ctx.Input.IP()
 }
+
+// 错误检查
+func (this *BaseController) checkError(err error) {
+	if err != nil {
+		this.showMsg(err.Error(), MSG_ERR)
+	}
+}

@@ -143,3 +143,11 @@ func (this *Auth) Login(userName, password string) (string, error) {
 func (this *Auth) Logout() error {
 	return nil
 }
+
+// 获取当前登录的用户名
+func (this *Auth) GetUserName() string {
+	if this.IsLogined() {
+		return this.loginUser.UserName
+	}
+	return ""
+}
