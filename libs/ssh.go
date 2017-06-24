@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"net"
 	"os"
 	"path"
 
@@ -43,9 +44,9 @@ func (s *ServerConn) getSshConnect() (*ssh.Client, error) {
 		keys = append(keys, pk)
 	}
 	config.Auth = append(config.Auth, ssh.PublicKeys(keys...))
-	/*config.HostKeyCallback = func(hostname string, remote net.Addr, key ssh.PublicKey) error {
+	config.HostKeyCallback = func(hostname string, remote net.Addr, key ssh.PublicKey) error {
 		return nil
-	}*/
+	}
 	conn, err := ssh.Dial("tcp", s.addr, &config)
 	if err != nil {
 		return nil, fmt.Errorf("无法连接到服务器 [%s]: %v", s.addr, err)
