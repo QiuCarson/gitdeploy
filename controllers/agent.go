@@ -9,7 +9,6 @@ import (
 
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/validation"
-	"github.com/lisijie/gopub/app/service"
 )
 
 type AgentController struct {
@@ -25,7 +24,7 @@ func (this *AgentController) List() {
 	if page < 1 {
 		page = 1
 	}
-	count, err := servers.GetTotal(service.SERVER_TYPE_AGENT)
+	count, err := servers.GetTotal(models.SERVER_TYPE_AGENT)
 	this.checkError(err)
 	serverList, err := servers.GetAgentList(page, this.pageSize)
 	this.checkError(err)
@@ -41,7 +40,7 @@ func (this *AgentController) List() {
 func (this *AgentController) Add() {
 	if this.isPost() {
 		server := &models.Server{}
-		server.TypeId = service.SERVER_TYPE_AGENT
+		server.TypeId = models.SERVER_TYPE_AGENT
 		server.Ip = this.GetString("server_ip")
 		server.Area = this.GetString("area")
 		server.SshPort, _ = this.GetInt("ssh_port")
