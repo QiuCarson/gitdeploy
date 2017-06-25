@@ -74,3 +74,19 @@ func (this *Env) DeleteEnv(id int) error {
 	o.QueryTable(this.serverTable()).Filter("env_id", id).Delete()
 	return nil
 }
+
+// 新增发布环境
+func (this *Env) AddEnv(env *Env) error {
+	env.ServerCount = len(env.ServerList)
+	if _, err := o.Insert(env); err != nil {
+		return err
+	}
+	for _, sv := range env.ServerList {
+		es := new(EnvServer)
+		es.ProjectId = env.ProjectId
+		es.EnvId = env.Id
+		es.ServerId = sv.Id
+		o.Insert(es)
+	}
+	return nil
+}
