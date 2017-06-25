@@ -8,7 +8,6 @@ import (
 	"strings"
 
 	"github.com/astaxie/beego"
-	"github.com/lisijie/gopub/app/service"
 )
 
 type ProjectController struct {
@@ -130,7 +129,7 @@ func (this *ProjectController) Del() {
 	err := projects.DeleteProject(id)
 	this.checkError(err)
 
-	service.ActionService.Add("del_project", this.auth.GetUserName(), "project", id, "")
+	new(models.Action).Add("del_project", this.auth.GetUserName(), "project", id, "")
 
 	this.redirect(beego.URLFor("ProjectController.List"))
 }
