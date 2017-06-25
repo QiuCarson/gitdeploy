@@ -133,3 +133,85 @@ func (this *ProjectController) Del() {
 
 	this.redirect(beego.URLFor("ProjectController.List"))
 }
+
+// 重新克隆
+func (this *ProjectController) Clone() {
+	var (
+		projects models.Project
+	)
+	id, _ := this.GetInt("id")
+	project, err := projects.GetProject(id)
+	this.checkError(err)
+	if project.Status != -1 {
+		this.showMsg("只能对克隆失败的项目操作.", MSG_ERR)
+	}
+
+	project.Status = 0
+	projects.UpdateProject(project, "Status")
+	go projects.CloneRepo(id)
+
+	this.showMsg("", MSG_OK)
+}
+
+// 获取项目克隆状态
+func (this *ProjectController) GetStatus() {
+	var (
+		projects models.Project
+	)
+	id, _ := this.GetInt("id")
+	project, _ := projects.GetProject(id)
+
+	out := make(map[string]interface{})
+	out["status"] = project.Status
+	out["error"] = project.ErrorMsg
+
+	this.jsonResult(out)
+}
+
+// 编辑项目
+func (this *ProjectController) Edit() {
+	var (
+		projects models.Project
+		servers  models.Server
+	)
+	id, _ := this.GetInt("id")
+	p, err := projects.GetProject(id)
+	this.checkError(err)
+
+	if this.isPost() {
+		p.Name = this.GetString("project_name")
+		p.AgentId, _ = this.GetInt("agent_id")
+		p.IgnoreList = this.GetString("ignore_list")
+		p.BeforeShell = this.GetString("before_shell")
+		p.AfterShell = this.GetString("after_shell")
+		p.TaskReview, _ = this.GetInt("task_review")
+		if p.Status == -1 {
+			p.RepoUrl = this.GetString("repo_url")
+		}
+		if v, _ := this.GetInt("create_verfile"); v > 0 {
+			p.CreateVerfile = 1
+		} else {
+			p.CreateVerfile = 0
+		}
+		p.VerfilePath = strings.Replace(this.GetString("verfile_path"), ".", "", -1)
+
+		if err := this.validProject(p); err != nil {
+			this.showMsg(err.Error(), MSG_ERR)
+		}
+
+		err := projects.UpdateProject(p, "Name", "AgentId", "IgnoreList", "BeforeShell", "AfterShell", "RepoUrl", "CreateVerfile", "VerfilePath", "TaskReview")
+		this.checkError(err)
+
+		new(models.Action).Add("edit_project", this.auth.GetUserName(), "project", p.Id, "")
+
+		this.redirect(beego.URLFor("ProjectController.List"))
+	}
+
+	agentList, err := servers.GetAgentList(1, -1)
+	this.checkError(err)
+
+	this.Data["project"] = p
+	this.Data["agentList"] = agentList
+	this.Data["pageTitle"] = "编辑项目"
+	this.display()
+}
