@@ -1,6 +1,7 @@
 package models
 
 import (
+	"os"
 	"time"
 )
 
@@ -91,4 +92,30 @@ func (this *Project) CloneRepo(projectId int) error {
 	this.UpdateProject(project, "Status", "ErrorMsg")
 
 	return err
+}
+
+// 删除一个项目
+func (this *Project) DeleteProject(projectId int) error {
+	var (
+		tasks Task
+		envs  Env
+	)
+	project, err := this.GetProject(projectId)
+	if err != nil {
+		return err
+	}
+	// 删除目录
+	path := GetProjectPath(project.Domain)
+	os.RemoveAll(path)
+	// 环境配置
+	if envList, err := envs.GetEnvListByProjectId(project.Id); err != nil {
+		for _, env := range envList {
+			envs.DeleteEnv(env.Id)
+		}
+	}
+	// 删除任务
+	tasks.DeleteByProjectId(project.Id)
+	// 删除项目
+	o.Delete(project)
+	return nil
 }

@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/astaxie/beego"
+	"github.com/lisijie/gopub/app/service"
 )
 
 type ProjectController struct {
@@ -116,4 +117,20 @@ func (this *ProjectController) validProject(p *models.Project) error {
 		return fmt.Errorf(errorMsg)
 	}
 	return nil
+}
+
+// 删除项目
+func (this *ProjectController) Del() {
+	var (
+		projects models.Project
+	)
+
+	id, _ := this.GetInt("id")
+
+	err := projects.DeleteProject(id)
+	this.checkError(err)
+
+	service.ActionService.Add("del_project", this.auth.GetUserName(), "project", id, "")
+
+	this.redirect(beego.URLFor("ProjectController.List"))
 }

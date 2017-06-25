@@ -1,6 +1,8 @@
 package models
 
-import "time"
+import (
+	"time"
+)
 
 // 发布环境
 type Env struct {
@@ -21,4 +23,54 @@ type Env struct {
 	CreateTime  time.Time `orm:"auto_now_add;type(datetime)"` // 创建时间
 	UpdateTime  time.Time `orm:"auto_now;type(datetime)"`     // 更新时间
 	ServerList  []Server  `orm:"-"`                           // 服务器列表
+}
+
+// 表结构
+type EnvServer struct {
+	Id        int
+	ProjectId int `orm:"default(0)"`       // 项目id
+	EnvId     int `orm:"default(0);index"` // 环境id
+	ServerId  int `orm:"default(0)"`       // 服务器id
+}
+
+func (this *Env) table() string {
+	return tableName("env")
+}
+func (this *Env) serverTable() string {
+	return tableName("env_server")
+}
+
+// 获取某个项目的发布环境列表
+func (this *Env) GetEnvListByProjectId(projectId int) ([]Env, error) {
+	var list []Env
+	_, err := o.QueryTable(this.table()).Filter("project_id", projectId).All(&list)
+	for _, env := range list {
+		env.ServerList, _ = this.GetEnvServers(env.Id)
+	}
+	return list, err
+}
+
+// 获取某个发布环境的服务器列表
+func (this *Env) GetEnvServers(envId int) ([]Server, error) {
+	var (
+		list    []EnvServer
+		servers Server
+	)
+	_, err := o.QueryTable(this.serverTable()).Filter("env_id", envId).All(&list)
+	if err != nil {
+		return nil, err
+	}
+	servIds := make([]int, 0, len(list))
+	for _, v := range list {
+		servIds = append(servIds, v.ServerId)
+	}
+
+	return servers.GetListByIds(servIds)
+}
+
+// 删除发布环境
+func (this *Env) DeleteEnv(id int) error {
+	o.QueryTable(this.table()).Filter("id", id).Delete()
+	o.QueryTable(this.serverTable()).Filter("env_id", id).Delete()
+	return nil
 }

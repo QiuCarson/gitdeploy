@@ -67,3 +67,17 @@ func (this *Server) AddServer(server *Server) error {
 	_, err := o.Insert(server)
 	return err
 }
+
+// 根据id列表获取记录
+func (this *Server) GetListByIds(ids []int) ([]Server, error) {
+	var list []Server
+	if len(ids) == 0 {
+		return nil, errors.New("ids不能为空")
+	}
+	params := make([]interface{}, len(ids))
+	for k, v := range ids {
+		params[k] = v
+	}
+	_, err := o.QueryTable(this.table()).Filter("id__in", params...).All(&list)
+	return list, err
+}

@@ -69,3 +69,9 @@ func (this *Task) GetTask(id int) (*Task, error) {
 func (this *Task) GetPubTotal() (int64, error) {
 	return o.QueryTable(this.table()).Filter("pub_status", 3).Count()
 }
+
+// 删除某个项目下的而所有发布任务
+func (this *Task) DeleteByProjectId(projectId int) error {
+	_, err := o.QueryTable(this.table()).Filter("project_id", projectId).Delete()
+	return err
+}

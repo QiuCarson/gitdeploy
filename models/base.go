@@ -43,7 +43,7 @@ func init() {
 	)
 
 	if beego.AppConfig.String("runmode") == "dev" {
-		orm.Debug = true
+		//orm.Debug = true
 	}
 	o = orm.NewOrm()
 	//orm.RunCommand()
