@@ -40,6 +40,8 @@ func init() {
 		new(Server),
 		new(Project),
 		new(Task),
+		new(Env),
+		new(EnvServer),
 	)
 
 	if beego.AppConfig.String("runmode") == "dev" {
