@@ -11,7 +11,6 @@ import (
 
 	"github.com/astaxie/beego"
 	"github.com/issue9/utils"
-	"github.com/lisijie/gopub/app/mail"
 )
 
 type Deploy struct{}
@@ -151,7 +150,7 @@ func (this *Deploy) doDeploy(task *Task) {
 
 			mailTo := strings.Split(mailTpl.MailTo+"\n"+env.MailTo, "\n")
 			mailCc := strings.Split(mailTpl.MailCc+"\n"+env.MailCc, "\n")
-			if err := mail.SendMail(subject, content, mailTo, mailCc); err != nil {
+			if err := libs.SendMail(subject, content, mailTo, mailCc); err != nil {
 				beego.Error("邮件发送失败：", err)
 				//this.recordLog("task.publish", fmt.Sprintf("邮件发送失败：%v", err))
 			}
