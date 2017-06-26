@@ -191,3 +191,30 @@ func (this *Task) GetReviewInfo(taskId int) (*TaskReview, error) {
 	err := o.QueryTable(tableName("task_review")).Filter("task_id", taskId).OrderBy("-id").Limit(1).One(review)
 	return review, err
 }
+
+// 任务审批
+func (this *Task) ReviewTask(taskId, userId, status int, message string) error {
+	if status != 1 && status != -1 {
+		return fmt.Errorf("审批状态无效: %d", status)
+	}
+	user, err := new(User).GetUser(userId, false)
+	if err != nil {
+		return err
+	}
+	task, err := this.GetTask(taskId)
+	if err != nil {
+		return err
+	}
+	review := &TaskReview{}
+	review.TaskId = task.Id
+	review.UserId = user.Id
+	review.UserName = user.UserName
+	review.Status = status
+	review.Message = message
+	if _, err := o.Insert(review); err != nil {
+		return err
+	}
+
+	task.ReviewStatus = status
+	return this.UpdateTask(task, "ReviewStatus")
+}

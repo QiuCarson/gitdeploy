@@ -22,13 +22,7 @@ func init() {
 	beego.AutoRouter(&controllers.TaskController{})
 	beego.AutoRouter(&controllers.UserController{})
 	beego.AutoRouter(&controllers.RoleController{})
+	beego.AutoRouter(&controllers.ReviewController{})
 	beego.AutoRouter(&controllers.MainController{})
-	/*
 
-
-		beego.AutoRouter(&controllers.UserController{})
-		beego.AutoRouter(&controllers.RoleController{})
-
-		beego.AutoRouter(&controllers.ReviewController{})
-		beego.AutoRouter(&controllers.MainController{})*/
 }

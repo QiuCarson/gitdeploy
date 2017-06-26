@@ -4,13 +4,13 @@ package controllers
 
 import (
 	"fmt"
+	"gitdeploy/libs"
 	"gitdeploy/models"
 	"regexp"
 	"strconv"
 
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/validation"
-	"github.com/lisijie/gopub/app/libs"
 )
 
 type UserController struct {
