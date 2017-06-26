@@ -61,7 +61,8 @@ func (this *Server) GetAgentList(page, pageSize int) ([]Server, error) {
 // 添加服务器
 func (this *Server) AddServer(server *Server) error {
 	server.Id = 0
-	if o.Read(server, "ip"); server.Id > 0 {
+
+	if o.Read(server, "ip", "type_id"); server.Id > 0 {
 		return errors.New("服务器IP已存在:" + server.Ip)
 	}
 	_, err := o.Insert(server)
