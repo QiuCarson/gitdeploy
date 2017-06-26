@@ -119,3 +119,8 @@ func (this *Project) DeleteProject(projectId int) error {
 	o.Delete(project)
 	return nil
 }
+
+// 获取所有项目
+func (this *Project) GetAllProject() ([]Project, error) {
+	return this.GetList(1, -1)
+}

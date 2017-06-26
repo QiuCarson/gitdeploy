@@ -91,3 +91,13 @@ func GetProjectPath(name string) string {
 func GetProjectsBasePath() string {
 	return fmt.Sprintf(beego.AppConfig.String("data_dir") + "/projects")
 }
+
+// 任务单目录
+func GetTaskPath(id int) string {
+	return fmt.Sprintf(GetTasksBasePath()+"/task-%d", id)
+}
+
+// 任务单根目录
+func GetTasksBasePath() string {
+	return fmt.Sprintf(beego.AppConfig.String("data_dir") + "/tasks")
+}

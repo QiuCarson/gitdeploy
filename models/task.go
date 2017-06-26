@@ -1,6 +1,8 @@
 package models
 
 import (
+	"fmt"
+	"os"
 	"strconv"
 	"time"
 
@@ -29,6 +31,16 @@ type Task struct {
 	UpdateTime   time.Time `orm:"auto_now;type(datetime)"`     // 更新时间
 	ProjectInfo  *Project  `orm:"-"`                           // 项目信息
 	EnvInfo      *Env      `orm:"-"`                           // 发布环境
+}
+
+type TaskReview struct {
+	Id         int
+	TaskId     int       `orm:"default(0)"`                  // 任务id
+	UserId     int       `orm:"default(0)"`                  // 审批人id
+	UserName   string    `orm:"size(20)"`                    // 审批人
+	Status     int       `orm:"default(0)"`                  // 审批结果(1:通过;0:不通过)
+	Message    string    `orm:"type(text)"`                  // 审批说明
+	CreateTime time.Time `orm:"auto_now_add;type(datetime)"` // 创建时间
 }
 
 func (this *Task) table() string {
@@ -74,4 +86,108 @@ func (this *Task) GetPubTotal() (int64, error) {
 func (this *Task) DeleteByProjectId(projectId int) error {
 	_, err := o.QueryTable(this.table()).Filter("project_id", projectId).Delete()
 	return err
+}
+
+// 删除任务
+func (this *Task) DeleteTask(taskId int) error {
+	task, err := this.GetTask(taskId)
+	if err != nil {
+		return err
+	}
+	if _, err := o.Delete(task); err != nil {
+		return err
+	}
+	return os.RemoveAll(GetTaskPath(task.Id))
+}
+
+// 获取任务单列表
+func (this *Task) GetList(page, pageSize int, filters ...interface{}) ([]Task, int64) {
+	var (
+		list  []Task
+		count int64
+	)
+
+	offset := (page - 1) * pageSize
+	query := o.QueryTable(this.table())
+
+	if len(filters) > 0 {
+		l := len(filters)
+		for k := 0; k < l; k += 2 {
+			field, ok := filters[k].(string)
+			if !ok {
+				continue
+			}
+			switch field {
+			case "start_date":
+				v := fmt.Sprintf("%s 00:00:00", filters[k+1].(string))
+				query = query.Filter("create_time__gte", v)
+			case "end_date":
+				v := fmt.Sprintf("%s 23:59:59", filters[k+1].(string))
+				query = query.Filter("create_time__lte", v)
+			default:
+				v := filters[k+1]
+				query = query.Filter(filters[k].(string), v)
+			}
+		}
+	}
+	count, _ = query.Count()
+
+	if count > 0 {
+		query.OrderBy("-id").Offset(offset).Limit(pageSize).All(&list)
+		for k, v := range list {
+			if p, err := new(Project).GetProject(v.ProjectId); err == nil {
+				list[k].ProjectInfo = p
+			} else {
+				list[k].ProjectInfo = new(Project)
+			}
+		}
+	}
+
+	return list, count
+}
+
+// 添加任务
+func (this *Task) AddTask(task *Task) error {
+	if _, err := new(EnvServer).GetEnv(task.PubEnvId); err != nil {
+		return fmt.Errorf("获取环境信息失败: %s", err.Error())
+	}
+	project, err := new(Project).GetProject(task.ProjectId)
+	if err != nil {
+		return fmt.Errorf("获取项目信息失败: %s", err.Error())
+	}
+	if project.TaskReview > 0 {
+		task.ReviewStatus = 0 // 未审批
+	} else {
+		task.ReviewStatus = 1 // 已审批
+	}
+	task.PubStatus = 0
+	// task.PubTime = time.Date(0, 0, 0, 0, 0, 0, 0, time.UTC)
+	_, err = o.Insert(task)
+	return err
+}
+
+// 构建发布包
+func (this *Task) BuildTask(task *Task) {
+	err := new(Deploy).Build(task)
+	if err != nil {
+		task.BuildStatus = -1
+		task.ErrorMsg = err.Error()
+	} else {
+		task.BuildStatus = 1
+		task.ErrorMsg = ""
+	}
+	this.UpdateTask(task, "BuildStatus", "ErrorMsg")
+}
+
+// 更新任务信息
+func (this *Task) UpdateTask(task *Task, fields ...string) error {
+	_, err := o.Update(task, fields...)
+	return err
+}
+
+// 获取审批信息
+func (this *Task) GetReviewInfo(taskId int) (*TaskReview, error) {
+	review := new(TaskReview)
+	err := o.QueryTable(tableName("task_review")).Filter("task_id", taskId).OrderBy("-id").Limit(1).One(review)
+	return review, err
 }

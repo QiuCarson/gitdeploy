@@ -27,3 +27,25 @@ func (this *MailTpl) GetMailTplList() ([]MailTpl, error) {
 	_, err := o.QueryTable(this.table()).OrderBy("-id").All(&list)
 	return list, err
 }
+
+func (this *MailTpl) AddMailTpl(tpl *MailTpl) error {
+	_, err := o.Insert(tpl)
+	return err
+}
+
+func (this *MailTpl) GetMailTpl(id int) (*MailTpl, error) {
+	tpl := &MailTpl{}
+	tpl.Id = id
+	err := o.Read(tpl)
+	return tpl, err
+}
+
+func (this *MailTpl) SaveMailTpl(tpl *MailTpl) error {
+	_, err := o.Update(tpl)
+	return err
+}
+
+func (this *MailTpl) DelMailTpl(id int) error {
+	_, err := o.QueryTable(this.table()).Filter("id", id).Delete()
+	return err
+}
