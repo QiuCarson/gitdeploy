@@ -17,16 +17,18 @@ type ServerConn struct {
 	addr       string // 192.168.1.1:22
 	user       string
 	key        string
+	pwd        string
 	conn       *ssh.Client
 	sftpClient *sftp.Client
 }
 
-func NewServerConn(addr, user, key string) *ServerConn {
+func NewServerConn(addr, user, key, pwd string) *ServerConn {
 	key = RealPath(key)
 	return &ServerConn{
 		addr: addr,
 		user: user,
 		key:  key,
+		pwd:  pwd,
 	}
 }
 
@@ -44,6 +46,10 @@ func (s *ServerConn) getSshConnect() (*ssh.Client, error) {
 		keys = append(keys, pk)
 	}
 	config.Auth = append(config.Auth, ssh.PublicKeys(keys...))
+	if s.pwd != "" {
+		config.Auth = append(config.Auth, ssh.Password(s.pwd))
+	}
+
 	config.HostKeyCallback = func(hostname string, remote net.Addr, key ssh.PublicKey) error {
 		return nil
 	}

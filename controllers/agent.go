@@ -67,6 +67,7 @@ func (this *AgentController) validServer(server *models.Server) error {
 	valid.Range(server.SshPort, 1, 65535, "ssh_port").Message("SSH端口无效")
 	valid.Required(server.SshUser, "ssh_user").Message("SSH用户名不能为空")
 	valid.Required(server.WorkDir, "work_dir").Message("工作目录不能为空")
+	valid.Required(server.SshPwd, "ssh_pwd").Message("SSH密码不能为空")
 	valid.IP(server.Ip, "ip").Message("服务器IP无效")
 	if valid.HasErrors() {
 		for _, err := range valid.Errors {
@@ -78,7 +79,7 @@ func (this *AgentController) validServer(server *models.Server) error {
 	}
 
 	addr := fmt.Sprintf("%s:%d", server.Ip, server.SshPort)
-	serv := libs.NewServerConn(addr, server.SshUser, server.SshKey)
+	serv := libs.NewServerConn(addr, server.SshUser, server.SshKey, server.SshPwd)
 
 	if err := serv.TryConnect(); err != nil {
 		return errors.New("无法连接到跳板机: " + err.Error())

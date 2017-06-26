@@ -101,7 +101,7 @@ func (this *ProjectController) validProject(p *models.Project) error {
 			return err
 		}
 		addr := fmt.Sprintf("%s:%d", agent.Ip, agent.SshPort)
-		serv := libs.NewServerConn(addr, agent.SshUser, agent.SshKey)
+		serv := libs.NewServerConn(addr, agent.SshUser, agent.SshKey, agent.SshPwd)
 		workPath := fmt.Sprintf("%s/%s", agent.WorkDir, p.Domain)
 
 		if err := serv.TryConnect(); err != nil {

@@ -146,7 +146,7 @@ func (this *DeployJob) PubToAgent() error {
 	)
 	// 连接到跳板机
 	addr := fmt.Sprintf("%s:%d", this.agent.Ip, this.agent.SshPort)
-	server := libs.NewServerConn(addr, this.agent.SshUser, this.agent.SshKey)
+	server := libs.NewServerConn(addr, this.agent.SshUser, this.agent.SshKey, this.agent.SshPwd)
 	defer server.Close()
 	beego.Debug("连接跳板机: ", addr, ", 用户: ", this.agent.SshUser, ", Key: ", this.agent.SshKey)
 
@@ -175,7 +175,7 @@ func (this *DeployJob) PubToAgent() error {
 func (this *DeployJob) PubToServer() (string, error) {
 	// 连接到跳板机
 	addr := fmt.Sprintf("%s:%d", this.agent.Ip, this.agent.SshPort)
-	server := libs.NewServerConn(addr, this.agent.SshUser, this.agent.SshKey)
+	server := libs.NewServerConn(addr, this.agent.SshUser, this.agent.SshKey, this.agent.SshPwd)
 	defer server.Close()
 	beego.Debug("连接跳板机: ", addr, ", 用户: ", this.agent.SshUser, ", Key: ", this.agent.SshKey)
 	// 执行发布脚本
