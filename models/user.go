@@ -104,3 +104,61 @@ func (this *User) GetUserListByRoleId(roleId int) ([]User, error) {
 	_, err := o.Raw(sql, roleId).QueryRows(&users)
 	return users, err
 }
+
+// 设置用户角色
+func (this *User) UpdateUserRoles(userId int, roleIds []int) error {
+	if _, err := this.GetUser(userId, false); err != nil {
+		return err
+	}
+	o.Raw("DELETE FROM "+tableName("user_role")+" WHERE user_id = ?", userId).Exec()
+	for _, v := range roleIds {
+		o.Raw("INSERT INTO "+tableName("user_role")+" (user_id, role_id) VALUES (?, ?)", userId, v).Exec()
+	}
+	return nil
+}
+
+// 分页获取用户列表
+func (this *User) GetUserList(page, pageSize int, getRoleInfo bool) ([]User, error) {
+	offset := (page - 1) * pageSize
+	if offset < 0 {
+		offset = 0
+	}
+
+	var users []User
+	qs := o.QueryTable(this.table())
+	_, err := qs.OrderBy("id").Limit(pageSize, offset).All(&users)
+	for k, user := range users {
+		users[k].RoleList, _ = this.GetUserRoleList(user.Id)
+	}
+
+	return users, err
+}
+
+// 添加用户
+func (this *User) AddUser(userName, email, password string, sex int) (*User, error) {
+	if exists, _ := this.GetUserByName(userName); exists.Id > 0 {
+		return nil, errors.New("用户名已存在")
+	}
+
+	user := &User{}
+	user.UserName = userName
+	user.Sex = sex
+	user.Email = email
+	user.Salt = string(utils.RandomCreateBytes(10))
+	user.Password = Md5([]byte(password + user.Salt))
+	// user.LastLogin = time.Date(0, 0, 0, 0, 0, 0, 0, time.UTC)
+	_, err := o.Insert(user)
+	return user, err
+}
+
+// 删除用户
+func (this *User) DeleteUser(userId int) error {
+	if userId == 1 {
+		return errors.New("不允许删除用户ID为1的用户")
+	}
+	user := &User{
+		Id: userId,
+	}
+	_, err := o.Delete(user)
+	return err
+}
