@@ -42,6 +42,7 @@ func init() {
 		new(Task),
 		new(Env),
 		new(EnvServer),
+		new(MailTpl),
 	)
 
 	if beego.AppConfig.String("runmode") == "dev" {
