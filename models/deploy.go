@@ -2,6 +2,7 @@ package models
 
 import (
 	"fmt"
+	"gitdeploy/libs"
 	"html"
 	"os"
 	"path/filepath"
@@ -10,7 +11,6 @@ import (
 
 	"github.com/astaxie/beego"
 	"github.com/issue9/utils"
-	"github.com/lisijie/gopub/app/libs"
 	"github.com/lisijie/gopub/app/mail"
 )
 

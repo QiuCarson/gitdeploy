@@ -3,9 +3,12 @@ package libs
 import (
 	"fmt"
 	"os"
+	"regexp"
 	"strconv"
 	"strings"
 )
+
+var emailPattern = regexp.MustCompile("[\\w!#$%&'*+/=?^_`{|}~-]+(?:\\.[\\w!#$%&'*+/=?^_`{|}~-]+)*@(?:[\\w](?:[\\w-]*[\\w])?\\.)+[a-zA-Z0-9](?:[\\w-]*[\\w])?")
 
 func RealPath(filePath string) string {
 	return os.ExpandEnv(filePath)
@@ -46,4 +49,15 @@ func VerCompare(ver1, ver2 string) int {
 	}
 
 	return strings.Compare(ver1, ver2)
+}
+
+// 换行符换成<br />
+func Nl2br(s string) string {
+	s = strings.Replace(s, "\r\n", "\n", -1)
+	s = strings.Replace(s, "\r", "\n", -1)
+	s = strings.Replace(s, "\n", "<br />", -1)
+	return s
+}
+func IsEmail(b []byte) bool {
+	return emailPattern.Match(b)
 }
