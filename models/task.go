@@ -1,9 +1,11 @@
 package models
 
 import (
+	"bufio"
 	"fmt"
 	"os"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/astaxie/beego/orm"
@@ -258,4 +260,20 @@ func (this *Task) GetPubStat(rangeType string) map[int]int {
 		}
 	}
 	return result
+}
+func (t *Task) GetChangeFileStat() string {
+	var modifyNum, addNum, deleteNum int
+	scaner := bufio.NewScanner(strings.NewReader(t.ChangeFiles))
+	for scaner.Scan() {
+		line := scaner.Bytes()
+		switch line[0] {
+		case 'M':
+			modifyNum++
+		case 'A':
+			addNum++
+		case 'D':
+			deleteNum++
+		}
+	}
+	return fmt.Sprintf("总数：%d，新增：%d，修改：%d，删除：%d", modifyNum+addNum+deleteNum, addNum, modifyNum, deleteNum)
 }
