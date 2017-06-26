@@ -17,8 +17,9 @@ func init() {
 
 	beego.AutoRouter(&controllers.AgentController{})
 	beego.AutoRouter(&controllers.EnvController{})
-	/*beego.AutoRouter(&controllers.TaskController{})
 	beego.AutoRouter(&controllers.ServerController{})
+	/*beego.AutoRouter(&controllers.TaskController{})
+
 
 	beego.AutoRouter(&controllers.UserController{})
 	beego.AutoRouter(&controllers.RoleController{})
