@@ -1,9 +1,9 @@
 package libs
 
 import (
-	"gitdeploy/gomail"
-
 	"strings"
+
+	gomail "gopkg.in/gomail.v2"
 
 	"github.com/astaxie/beego"
 )
