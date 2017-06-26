@@ -76,7 +76,7 @@ func (this *Env) DeleteEnv(id int) error {
 }
 
 // 新增发布环境
-func (this *Env) AddEnv(env *Env) error {
+func (this *EnvServer) AddEnv(env *Env) error {
 	env.ServerCount = len(env.ServerList)
 	if _, err := o.Insert(env); err != nil {
 		return err

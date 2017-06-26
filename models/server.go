@@ -81,3 +81,14 @@ func (this *Server) GetListByIds(ids []int) ([]Server, error) {
 	_, err := o.QueryTable(this.table()).Filter("id__in", params...).All(&list)
 	return list, err
 }
+
+// 获取普通服务器列表
+func (this *Server) GetServerList(page, pageSize int) ([]Server, error) {
+	var list []Server
+	qs := o.QueryTable(this.table()).Filter("TypeId", SERVER_TYPE_NORMAL)
+	if pageSize > 0 {
+		qs = qs.Limit(pageSize, (page-1)*pageSize)
+	}
+	_, err := qs.All(&list)
+	return list, err
+}

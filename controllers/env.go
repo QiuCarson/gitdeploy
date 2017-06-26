@@ -5,8 +5,6 @@ import (
 	"strconv"
 
 	"github.com/astaxie/beego"
-	"github.com/lisijie/gopub/app/entity"
-	"github.com/lisijie/gopub/app/service"
 )
 
 type EnvController struct {
@@ -29,6 +27,7 @@ func (this *EnvController) Add() {
 		projects   models.Project
 		servers    models.Server
 		envservers models.EnvServer
+		mailTpls   models.MailTpl
 	)
 	projectId, _ := this.GetInt("project_id")
 
@@ -36,7 +35,7 @@ func (this *EnvController) Add() {
 	this.checkError(err)
 
 	if this.isPost() {
-		env := new(entity.Env)
+		env := new(models.Env)
 		env.ProjectId = project.Id
 		env.Name = this.GetString("name")
 		env.SshUser = this.GetString("ssh_user")
@@ -82,8 +81,8 @@ func (this *EnvController) Add() {
 		this.redirect(beego.URLFor("EnvController.List", "project_id", projectId))
 	}
 
-	this.Data["serverList"], _ = service.ServerService.GetServerList(1, -1)
-	this.Data["mailTplList"], _ = service.MailService.GetMailTplList()
+	this.Data["serverList"], _ = servers.GetServerList(1, -1)
+	this.Data["mailTplList"], _ = mailTpls.GetMailTplList()
 	this.Data["project"] = project
 	this.Data["pageTitle"] = "添加发布环境"
 	this.display()
