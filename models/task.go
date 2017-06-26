@@ -218,3 +218,44 @@ func (this *Task) ReviewTask(taskId, userId, status int, message string) error {
 	task.ReviewStatus = status
 	return this.UpdateTask(task, "ReviewStatus")
 }
+
+// 发布统计
+func (this *Task) GetPubStat(rangeType string) map[int]int {
+	var sql string
+	var maps []orm.Params
+
+	switch rangeType {
+	case "this_month":
+		year, month, _ := time.Now().Date()
+		startTime := fmt.Sprintf("%d-%02d-01 00:00:00", year, month)
+		endTime := fmt.Sprintf("%d-%02d-31 23:59:59", year, month)
+		sql = fmt.Sprintf("SELECT DAY(pub_time) AS date, COUNT(*) AS count FROM %s WHERE pub_time BETWEEN '%s' AND '%s' GROUP BY DAY(pub_time) ORDER BY `date` ASC", this.table(), startTime, endTime)
+	case "last_month":
+		year, month, _ := time.Now().AddDate(0, -1, 0).Date()
+		startTime := fmt.Sprintf("%d-%02d-01 00:00:00", year, month)
+		endTime := fmt.Sprintf("%d-%02d-31 23:59:59", year, month)
+		sql = fmt.Sprintf("SELECT DAY(pub_time) AS date, COUNT(*) AS count FROM %s WHERE pub_time BETWEEN '%s' AND '%s' GROUP BY DAY(pub_time) ORDER BY `date` ASC", this.table(), startTime, endTime)
+	case "this_year":
+		year := time.Now().Year()
+		startTime := fmt.Sprintf("%d-01-01 00:00:00", year)
+		endTime := fmt.Sprintf("%d-12-31 23:59:59", year)
+		sql = fmt.Sprintf("SELECT MONTH(pub_time) AS date, COUNT(*) AS count FROM %s WHERE pub_time BETWEEN '%s' AND '%s' GROUP BY MONTH(pub_time) ORDER BY `date` ASC", this.table(), startTime, endTime)
+	case "last_year":
+		year := time.Now().Year() - 1
+		startTime := fmt.Sprintf("%d-01-01 00:00:00", year)
+		endTime := fmt.Sprintf("%d-12-31 23:59:59", year)
+		sql = fmt.Sprintf("SELECT MONTH(pub_time) AS date, COUNT(*) AS count FROM %s WHERE pub_time BETWEEN '%s' AND '%s' GROUP BY MONTH(pub_time) ORDER BY `date` ASC", this.table(), startTime, endTime)
+	}
+
+	num, err := o.Raw(sql).Values(&maps)
+
+	result := make(map[int]int)
+	if err == nil && num > 0 {
+		for _, v := range maps {
+			date, _ := strconv.Atoi(v["date"].(string))
+			count, _ := strconv.Atoi(v["count"].(string))
+			result[date] = count
+		}
+	}
+	return result
+}
