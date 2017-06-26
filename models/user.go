@@ -96,3 +96,11 @@ func (this *User) ModifyPassword(userId int, password string) error {
 	_, err = o.Update(user, "Salt", "Password")
 	return err
 }
+
+// 根据角色id获取用户列表
+func (this *User) GetUserListByRoleId(roleId int) ([]User, error) {
+	var users []User
+	sql := "SELECT u.* FROM " + this.table() + " u JOIN " + tableName("user_role") + " r ON u.id = r.user_id WHERE r.role_id = ?"
+	_, err := o.Raw(sql, roleId).QueryRows(&users)
+	return users, err
+}
