@@ -2,6 +2,8 @@ package models
 
 import (
 	"time"
+
+	"github.com/astaxie/beego/orm"
 )
 
 // 发布环境
@@ -36,7 +38,7 @@ type EnvServer struct {
 func (this *Env) table() string {
 	return tableName("env")
 }
-func (this *Env) serverTable() string {
+func (this *EnvServer) serverTable() string {
 	return tableName("env_server")
 }
 
@@ -56,7 +58,7 @@ func (this *Env) GetEnvServers(envId int) ([]Server, error) {
 		list    []EnvServer
 		servers Server
 	)
-	_, err := o.QueryTable(this.serverTable()).Filter("env_id", envId).All(&list)
+	_, err := o.QueryTable(new(EnvServer).serverTable()).Filter("env_id", envId).All(&list)
 	if err != nil {
 		return nil, err
 	}
@@ -71,7 +73,7 @@ func (this *Env) GetEnvServers(envId int) ([]Server, error) {
 // 删除发布环境
 func (this *Env) DeleteEnv(id int) error {
 	o.QueryTable(this.table()).Filter("id", id).Delete()
-	o.QueryTable(this.serverTable()).Filter("env_id", id).Delete()
+	o.QueryTable(new(EnvServer).serverTable()).Filter("env_id", id).Delete()
 	return nil
 }
 
@@ -89,4 +91,77 @@ func (this *EnvServer) AddEnv(env *Env) error {
 		o.Insert(es)
 	}
 	return nil
+}
+
+// 保存环境配置
+func (this *EnvServer) SaveEnv(env *Env) error {
+	env.ServerCount = len(env.ServerList)
+	if _, err := o.Update(env); err != nil {
+		return err
+	}
+	o.QueryTable(this.serverTable()).Filter("env_id", env.Id).Delete()
+	for _, sv := range env.ServerList {
+		es := new(EnvServer)
+		es.ProjectId = env.ProjectId
+		es.EnvId = env.Id
+		es.ServerId = sv.Id
+		o.Insert(es)
+	}
+	return nil
+}
+
+// 删除发布环境
+func (this *EnvServer) DeleteEnv(id int) error {
+	o.QueryTable(new(Env).table()).Filter("id", id).Delete()
+	o.QueryTable(this.serverTable()).Filter("env_id", id).Delete()
+	return nil
+}
+
+// 获取一个发布环境信息
+func (this *EnvServer) GetEnv(id int) (*Env, error) {
+	env := &Env{}
+	env.Id = id
+	err := o.Read(env)
+	if err == nil {
+		env.ServerList, _ = new(Env).GetEnvServers(env.Id)
+	}
+	return env, err
+}
+
+// 删除服务器
+func (this *EnvServer) DeleteServer(serverId int) error {
+	var envServers []EnvServer
+	o.QueryTable(this.serverTable()).Filter("server_id", serverId).All(&envServers)
+	if len(envServers) < 1 {
+		return nil
+	}
+	envIds := make([]int, 0, len(envServers))
+	for _, v := range envServers {
+		envIds = append(envIds, v.EnvId)
+	}
+	o.QueryTable(this.serverTable()).Filter("server_id", serverId).Delete()
+	o.QueryTable(new(Env).table()).Filter("id__in", envIds).Update(orm.Params{
+		"server_count": orm.ColValue(orm.ColMinus, 1),
+	})
+	return nil
+}
+
+// 根据服务器id发布环境列表
+func (this *EnvServer) GetEnvListByServerId(serverId int) ([]Env, error) {
+	var (
+		servList []EnvServer
+		envList  []Env
+	)
+	o.QueryTable(this.serverTable()).Filter("server_id", serverId).All(&servList)
+	envIds := make([]int, 0, len(servList))
+	for _, serv := range servList {
+		envIds = append(envIds, serv.EnvId)
+	}
+	envList = make([]Env, 0)
+	if len(envIds) > 0 {
+		if _, err := o.QueryTable(new(Env).table()).Filter("id__in", envIds).All(&envList); err != nil {
+			return envList, err
+		}
+	}
+	return envList, nil
 }

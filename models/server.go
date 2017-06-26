@@ -92,3 +92,18 @@ func (this *Server) GetServerList(page, pageSize int) ([]Server, error) {
 	_, err := qs.All(&list)
 	return list, err
 }
+
+// 修改服务器信息
+func (this *Server) UpdateServer(server *Server, fields ...string) error {
+	_, err := o.Update(server, fields...)
+	return err
+}
+
+// 删除服务器
+func (this *Server) DeleteServer(id int) error {
+	_, err := o.QueryTable(this.table()).Filter("id", id).Delete()
+	if err != nil {
+		return err
+	}
+	return new(EnvServer).DeleteServer(id)
+}
