@@ -8,7 +8,7 @@ func (this *SystemService) GetPermList() map[string][]Perm {
 
 	result := make(map[string][]Perm)
 	for _, v := range list {
-		v.Key = v.Module + "." + v.Action
+		v.Keyinfo = v.Module + "." + v.Action
 		if _, ok := result[v.Module]; !ok {
 			result[v.Module] = make([]Perm, 0)
 		}

@@ -43,8 +43,8 @@
 				{{range $k, $perm := $list}}
 				<div class="checkbox-inline mod-{{$perm.Module}}">
 					<label>
-					<input type="checkbox" name="perms" value="{{$perm.Key}}" {{map_get $.chkmap $perm.Key}}>
-					<span class="lbl">{{i18n $.lang $perm.Key}}</span>
+					<input type="checkbox" name="perms" value="{{$perm.Keyinfo}}" {{map_get $.chkmap $perm.Keyinfo}}>
+					<span class="lbl">{{i18n $.lang $perm.Keyinfo}}</span>
 					</label>
 				</div>
 				{{end}}

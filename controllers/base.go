@@ -36,9 +36,7 @@ func (this *BaseController) Prepare() {
 	this.controllerName = strings.ToLower(controllerName[0 : len(controllerName)-10])
 	this.actionName = strings.ToLower(actionName)
 	this.initAuth()
-
 	this.initLang()
-	//this.getMenuList()
 }
 
 func (this *BaseController) initAuth() {

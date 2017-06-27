@@ -64,7 +64,7 @@ func (this *Auth) initPermMap() {
 	this.permMap = make(map[string]bool)
 	for _, role := range this.loginUser.RoleList {
 		for _, perm := range role.PermList {
-			this.permMap[perm.Key] = true
+			this.permMap[perm.Keyinfo] = true
 		}
 	}
 }
