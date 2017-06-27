@@ -4,8 +4,6 @@ import (
 	"gitdeploy/models"
 	"strings"
 
-	"fmt"
-
 	"github.com/astaxie/beego"
 )
 
@@ -93,10 +91,9 @@ func (this *RoleController) Perm() {
 	chkmap := make(map[string]string)
 	for _, v := range role.PermList {
 		chkmap[v.Keyinfo] = "checked"
-		fmt.Println(v.Keyinfo)
+
 	}
 
-	fmt.Println(role.PermList)
 	if role.ProjectIds != "" {
 		pids := strings.Split(role.ProjectIds, ",")
 		for _, pid := range pids {
