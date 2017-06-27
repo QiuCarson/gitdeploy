@@ -8,7 +8,7 @@ import (
 )
 
 func main() {
-	beego.SetStaticPath("/assets", "assets")
+	beego.SetStaticPath("/static", "static")
 	beego.AddFuncMap("i18n", i18n.Tr)
 
 	beego.Run()
