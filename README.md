@@ -13,7 +13,7 @@ admin888<br>
 要发布的服务器必须要跟跳板机授权<br>
 [两台服务器ssh授权](https://www.phpsong.com/2169.html)
 
-程序使用的包
+程序使用的包<br>
 go get github.com/astaxie/beego 【beego 框架】<br>
 go get golang.org/x/crypto/ssh<br>
 go get github.com/pkg/sftp<br>
